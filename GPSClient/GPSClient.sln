@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.34112.143
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GPSClient", "GPSClient\GPSClient.vcxproj", "{53A473A7-9516-4BF6-BAD8-1C773C543C16}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{53A473A7-9516-4BF6-BAD8-1C773C543C16}.Debug|x64.ActiveCfg = Debug|x64
+		{53A473A7-9516-4BF6-BAD8-1C773C543C16}.Debug|x64.Build.0 = Debug|x64
+		{53A473A7-9516-4BF6-BAD8-1C773C543C16}.Release|x64.ActiveCfg = Release|x64
+		{53A473A7-9516-4BF6-BAD8-1C773C543C16}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {66098A41-8F67-4152-AA8C-6305575BB198}
+	EndGlobalSection
+EndGlobal
