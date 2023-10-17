@@ -3,8 +3,11 @@
 #include <QDebug>
 #include <QThread>
 #include <QStringList>
-
+#include <QtSql/QtSql>
 #include <QObject>
+#include <iostream>
+
+using namespace std;
 
 class SerialReader : public QObject
 {
@@ -81,14 +84,35 @@ public:
 		else {
 			qDebug() << "Impossible d ouvrir le port serie.";
 		}
+
+
+		QSqlDatabase db = QSqlDatabase::addDatabase("QMYSQL"); // ou mettre QSQLITE pour SQLite
+
+		db.setHostName("192.168.64.213");
+		db.setUserName("root");
+		db.setPassword("root");
+		db.setDatabaseName("Lawrence"); // ou mettre le nom du fichier sqlite
+		if (db.open())
+		{
+			std::cout << "Connexion réussie à " << db.hostName().toStdString() << std::endl;
+		}
+		else
+		{
+			std::cout << "La connexion a échouée !" << std::endl;
+			
+		}
 	}
+
 };
 
 int main(int argc, char *argv[])
 {
+
+
 	QCoreApplication a(argc, argv);
 
 	SerialReader serialReader;
+
 
 	return a.exec();
 }
