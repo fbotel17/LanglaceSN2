@@ -16,6 +16,7 @@ class SerialReader : public QObject
 public slots:
 	void onReadyRead()
 	{
+		QSqlQuery r;
 		QByteArray newData = serialPort.readAll();
 		nmeaDataBuffer += QString(newData);
 
@@ -36,16 +37,45 @@ public slots:
 					QString longitude = fields[4]; // Longitude (DDDMM.MMMM)
 					QString longitudeDirection = fields[5]; // Direction de la longitude (E/W)
 
+					// Obtenir la date du jour
+					QDateTime currentDateTime = QDateTime::currentDateTime();
+					QString formattedDate = currentDateTime.toString("yyyy-MM-dd");
+
+					// Conversion de la latitude au format décimal
+					QString latitudeDecimal = latitude.left(2) + "." + latitude.mid(2);
+					if (latitudeDirection == "S") {
+						latitudeDecimal.prepend("-");
+					}
+
+					// Conversion de la longitude au format décimal
+					QString longitudeDecimal = longitude.left(3) + "." + longitude.mid(3);
+					if (longitudeDirection == "W") {
+						longitudeDecimal.prepend("-");
+					}
+
 					// Stockez les valeurs dans les variables de classe
-					this->latitude = latitude;
-					this->longitude = longitude;
+					this->latitude = latitudeDecimal;
+					this->longitude = longitudeDecimal;
+					this->date = formattedDate;
 					this->time = time;
 
-					qDebug() << "longitude : "<< longitude;
-					qDebug() << "latitude : " << latitude;
-					qDebug() << "heure : " << time << endl;
+					qDebug() << "longitude : " << this->longitude;
+					qDebug() << "latitude : " << this->latitude;
+					qDebug() << "date : " << this->date;
+					qDebug() << "heure : " << time;
 
-
+					r.prepare("INSERT INTO GPS (date, heure, latitude, longitude) VALUES (?, STR_TO_DATE(?, '%H%i%s'), ?, ?)");
+					r.addBindValue(this->date);
+					r.addBindValue(this->time);
+					r.addBindValue(this->latitude);
+					r.addBindValue(this->longitude);
+					if (r.exec()) {
+						std::cout << "Insertion réussie" << std::endl;
+					}
+					else {
+						std::cout << "Echec insertion !" << std::endl;
+						qDebug() << r.lastError().text();
+					}
 				}
 			}
 			else {
@@ -55,12 +85,15 @@ public slots:
 		}
 	}
 
+
+
 private:
 	QSerialPort serialPort;
 	QString nmeaDataBuffer; // Tampon pour collecter les caractères entrants
 	QString latitude;
 	QString longitude;
 	QString time;
+	QString date;
 
 public:
 	SerialReader()
@@ -88,7 +121,7 @@ public:
 
 		QSqlDatabase db = QSqlDatabase::addDatabase("QMYSQL"); // ou mettre QSQLITE pour SQLite
 
-		db.setHostName("192.168.64.213");
+		db.setHostName("192.168.65.252");
 		db.setUserName("root");
 		db.setPassword("root");
 		db.setDatabaseName("Lawrence"); // ou mettre le nom du fichier sqlite
@@ -112,6 +145,7 @@ int main(int argc, char *argv[])
 	QCoreApplication a(argc, argv);
 
 	SerialReader serialReader;
+	
 
 
 	return a.exec();
