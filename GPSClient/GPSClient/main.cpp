@@ -42,16 +42,10 @@ public slots:
 					QString formattedDate = currentDateTime.toString("yyyy-MM-dd");
 
 					// Conversion de la latitude au format décimal
-					QString latitudeDecimal = latitude.left(2) + "." + latitude.mid(2);
-					if (latitudeDirection == "S") {
-						latitudeDecimal.prepend("-");
-					}
+					QString latitudeDecimal = convertToDecimal(latitude, latitudeDirection);
 
 					// Conversion de la longitude au format décimal
-					QString longitudeDecimal = longitude.left(3) + "." + longitude.mid(3);
-					if (longitudeDirection == "W") {
-						longitudeDecimal.prepend("-");
-					}
+					QString longitudeDecimal = convertToDecimal(longitude, longitudeDirection);
 
 					// Stockez les valeurs dans les variables de classe
 					this->latitude = latitudeDecimal;
@@ -96,10 +90,42 @@ private:
 	QString date;
 
 public:
+
+	QString convertToDecimal(const QString& coordinate, const QString& direction)
+	{
+		// Convertit la latitude ou la longitude au format décimal
+		double decimalCoordinate = coordinate.toDouble();
+
+		// Ajoutez votre logique de traitement spécifique ici
+		if (direction.toUpper() == "S" || direction.toUpper() == "W")
+		{
+			// Supprime les trois premiers chiffres de la longitude
+			QString result = QString::number(decimalCoordinate, 'f', 7).mid(3);
+
+			// Supprime les zéros inutiles
+			result = result.trimmed().remove(QRegExp("0+$")).remove(QRegExp("\\.$"));
+
+			return result.prepend('-');
+		}
+		else if (direction.toUpper() == "N" || direction.toUpper() == "E")
+		{
+			// Supprime le premier chiffre de la latitude
+			QString result = QString::number(decimalCoordinate, 'f', 7).mid(1);
+
+			// Supprime les zéros inutiles
+			result = result.trimmed().remove(QRegExp("^0+")).remove(QRegExp("\\.$"));
+
+			return result;
+		}
+
+		// Si la direction n'est ni "S" ni "W" ni "N" ni "E", retourne une chaîne vide ou un message d'erreur selon vos besoins.
+		return QString();
+	}
+
 	SerialReader()
 	{
 		// Spécifiez le nom du port série (vérifiez le nom du port Arduino sur votre ordinateur)
-		serialPort.setPortName("COM3"); // Remplacez "COM1" par le nom de votre port série
+		serialPort.setPortName("COM1"); // Remplacez "COM1" par le nom de votre port série
 
 		// Configurez le débit en bauds, les bits de données, la parité, le nombre de bits d'arrêt, etc.
 		serialPort.setBaudRate(QSerialPort::Baud9600);
