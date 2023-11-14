@@ -134,10 +134,11 @@ public:
 		return QString("Erreur, la convertion n'a pas marchée");
 	}
 
+	// Méthode qui permet de régler les paramètre de la connexion série avec le GPS
 	SerialReader()
 	{
 		// Spécifiez le nom du port série (vérifiez le nom du port Arduino sur votre ordinateur)
-		serialPort.setPortName("COM1"); // Remplacez "COM1" par le nom de votre port série
+		serialPort.setPortName("COM1"); // Remplacez "COM1" par COM3 pour le vrai GPS
 
 		// Configurez le débit en bauds, les bits de données, la parité, le nombre de bits d'arrêt, etc.
 		serialPort.setBaudRate(QSerialPort::Baud9600);
@@ -146,9 +147,11 @@ public:
 		serialPort.setStopBits(QSerialPort::OneStop);
 		serialPort.setFlowControl(QSerialPort::NoFlowControl);
 
+		//Une fois tout les paramètres rentrés, on se connecte en série
 		connect(&serialPort, SIGNAL(readyRead()), this, SLOT(onReadyRead()));
 
 		// Ouvrez le port série
+		// Si le port est bien ouvert, on envoie un message de debuguage
 		if (serialPort.open(QIODevice::ReadOnly)) {
 			qDebug() << "Port serie ouvert.";
 		}
@@ -156,13 +159,15 @@ public:
 			qDebug() << "Impossible d ouvrir le port serie.";
 		}
 
-
+		// On configure la base de données
 		QSqlDatabase db = QSqlDatabase::addDatabase("QMYSQL"); // ou mettre QSQLITE pour SQLite
 
 		db.setHostName("192.168.65.252");
 		db.setUserName("root");
 		db.setPassword("root");
 		db.setDatabaseName("Lawrence"); // ou mettre le nom du fichier sqlite
+
+		// On vérifie si on est bien connecté à la base de données
 		if (db.open())
 		{
 			std::cout << "Connexion réussie à " << db.hostName().toStdString() << std::endl;
@@ -176,12 +181,15 @@ public:
 
 };
 
+// Le main est très court
 int main(int argc, char *argv[])
 {
 
+	//On créer l'application
 
 	QCoreApplication a(argc, argv);
 
+	// On appelle la méthode principale
 	SerialReader serialReader;
 	
 
