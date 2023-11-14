@@ -9,11 +9,13 @@
 
 using namespace std;
 
+// On créer une classe SerialReader pour lire en série les données du GPS
 class SerialReader : public QObject
 {
 	Q_OBJECT
 
 public slots:
+	// Méthode onReadyRead quiq sert de méthode principale qui appelle les autre méthodes.
 	void onReadyRead()
 	{
 		QSqlQuery r;
@@ -38,13 +40,17 @@ public slots:
 					QString longitudeDirection = fields[5]; // Direction de la longitude (E/W)
 
 					// Obtenir la date du jour
+					// On appelle la méthode currentDateTime()
 					QDateTime currentDateTime = QDateTime::currentDateTime();
+					// Puis on la formate au format voulu.
 					QString formattedDate = currentDateTime.toString("yyyy-MM-dd");
 
 					// Conversion de la latitude au format décimal
+					// On appelle la fonction convertToDecimal() avec comme paramètre la latitude et la latitudeDirection
 					QString latitudeDecimal = convertToDecimal(latitude, latitudeDirection);
 
 					// Conversion de la longitude au format décimal
+					// On appelle la fonction convertToDecimal() avec comme paramètre la longitude et la longitudeDirection
 					QString longitudeDecimal = convertToDecimal(longitude, longitudeDirection);
 
 					// Stockez les valeurs dans les variables de classe
@@ -53,16 +59,20 @@ public slots:
 					this->date = formattedDate;
 					this->time = time;
 
+					// On envoie les valeurs dans la console pour comprendre ce que fait le code
 					qDebug() << "longitude : " << this->longitude;
 					qDebug() << "latitude : " << this->latitude;
 					qDebug() << "date : " << this->date;
 					qDebug() << "heure : " << time;
 
+					// On prépare l'insertion en BDD des informations converties du GPS
 					r.prepare("INSERT INTO GPS (date, heure, latitude, longitude) VALUES (?, STR_TO_DATE(?, '%H%i%s'), ?, ?)");
+					// On ajoute les bon paramètres aux bons endroits
 					r.addBindValue(this->date);
 					r.addBindValue(this->time);
 					r.addBindValue(this->latitude);
 					r.addBindValue(this->longitude);
+					//On exécute l'insertion en BDD et on envoie un message de confirmation
 					if (r.exec()) {
 						std::cout << "Insertion réussie" << std::endl;
 					}
@@ -82,7 +92,8 @@ public slots:
 
 
 private:
-	QSerialPort serialPort;
+	// Tout les paramètre important pour notre code
+	QSerialPort serialPort; // Numero de port (COM1)
 	QString nmeaDataBuffer; // Tampon pour collecter les caractères entrants
 	QString latitude;
 	QString longitude;
@@ -90,13 +101,13 @@ private:
 	QString date;
 
 public:
-
+	// Méthode qui convertie les données envoyées du GPS en nombre décimaux
 	QString convertToDecimal(const QString& coordinate, const QString& direction)
 	{
 		// Convertit la latitude ou la longitude au format décimal
 		double decimalCoordinate = coordinate.toDouble();
 
-		// Ajoutez votre logique de traitement spécifique ici
+		// Condition qui vérifie la direction
 		if (direction.toUpper() == "S" || direction.toUpper() == "W")
 		{
 			// Supprime les trois premiers chiffres de la longitude
@@ -107,6 +118,7 @@ public:
 
 			return result.prepend('-');
 		}
+		// Condition qui vérifie la direction
 		else if (direction.toUpper() == "N" || direction.toUpper() == "E")
 		{
 			// Supprime le premier chiffre de la latitude
@@ -119,7 +131,7 @@ public:
 		}
 
 		// Si la direction n'est ni "S" ni "W" ni "N" ni "E", retourne une chaîne vide ou un message d'erreur selon vos besoins.
-		return QString();
+		return QString("Erreur, la convertion n'a pas marchée");
 	}
 
 	SerialReader()
